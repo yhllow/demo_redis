@@ -1,0 +1,14 @@
+server:
+  port: 30221
+
+redis:
+  servers: 192.168.170.104:7001 192.168.170.104:7002 192.168.170.105:7001
+  databases: 4
+  maxAttempts: 2
+  maxTotal: 1024
+  maxIdle: 1024
+  minIdle: 32
+  timeout: 100
+  soTimeout: 200
+  maxWaitMillis: 300
+  appName: redis_demo

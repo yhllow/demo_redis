@@ -1,0 +1,26 @@
+1、压缩列表
+redis 127.0.0.1:6379> rpush 'test' 'a'
+(integer) 1
+redis 127.0.0.1:6379> rpush 'test' 'b'
+(integer) 2
+redis 127.0.0.1:6379> rpush 'test' 'c'
+(integer) 3
+redis 127.0.0.1:6379> rpush 'test' 'd'
+(integer) 4
+redis 127.0.0.1:6379> debug object test
+//ziplist表示使用的压缩列表
+Value at:008F0B94 refcount:1 encoding:ziplist serializedlength:24 lru:1153675 lru_seconds_idle:70
+
+redis 127.0.0.1:6379> rpush 'test' aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+(integer) 9
+redis 127.0.0.1:6379> debug object test
+//linkedlist超过限制，则转换为标准列表
+Value at:008F0B94 refcount:1 encoding:linkedlist serializedlength:30 lru:1153690 lru_seconds_idle:0
+
+2、整数集合
+redis 127.0.0.1:6379> sadd set-object 插入500个元素
+(integer) 1
+redis 127.0.0.1:6379> debug object set-object
+//intset整数集合
+Value at:008F0D8C refcount:1 encoding:intset serializedlength:11 lru:1153742 lru_seconds_idle:10
+//再插入500-1000个元素，就超过了512个整数的限制，变成了普通的集合

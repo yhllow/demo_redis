@@ -1,0 +1,44 @@
+通过 info Replication 可以查看与复制相关的状态，对于了解主从节点的当前状态，以及解决出现的问题都会有帮助。
+#查看主redis的信息
+redis-cli 127.0.0.1 info Replication
+
+# Replication
+role:master #代表127.0.0.1:63791 这台redis是主
+connected_slaves:2
+slave0:ip=127.0.0.1,port=63792,state=online,offset=1079,lag=1
+slave1:ip=127.0.0.1,port=63793,state=online,offset=1079,lag=1
+
+#查看从redis的信息
+redis-cli 127.0.0.1 info Replication
+对于从节点，上半部分展示的是其作为从节点的状态，从 connectd_slaves 开始，展示的是其作为潜在的主节点的状态。
+# Replication
+role:slave #代表127.0.0.1:63792 这台redis是主
+master_host:127.0.0.1
+master_port:63791
+master_link_status:up
+master_last_io_seconds_ago:10
+master_sync_in_progress:0
+slave_repl_offset:71
+slave_priority:100
+slave_read_only:1
+connected_slaves:0
+
+#查看服务信息
+127.0.0.1:64791 info Server
+
+#查看Sentinel的信息
+127.0.0.1:64791 info Sentinel
+# Sentinel
+sentinel_masters:1
+sentinel_tilt:0
+sentinel_running_scripts:0
+sentinel_scripts_queue_length:0
+master0:name=mymaster,status=ok,address=127.0.0.1:63792,slaves=2,sentinels=3
+
+启动sentinel：
+redis-server.exe sentinel1.conf --sentinel
+
+用户认证：
+redis 127.0.0.1:6379> auth test123
+redis 127.0.0.1:6379> config get requirepass
+redis 127.0.0.1:6379> config set requirepass test123

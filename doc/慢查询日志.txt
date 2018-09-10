@@ -1,0 +1,27 @@
+参数slowlog-log-slower-than：指定执行时间超过多少微秒的命令请求会被记录到日志上
+slowlog-max-len：指定服务器最多保存多少条慢查询日志
+例如：
+slowlog-log-slower-than 0
+slowlog-max-len 5
+超过0微秒的查询就会记录，相当于所有查询都记录，最多保存5条
+
+1、查看慢查询日志
+127.0.0.1:63781> slowlog get
+1) 1) (integer) 1
+   2) (integer) 1461043097
+   3) (integer) 5
+   4) 1) "set"
+      2) "msg"
+      3) "abc"
+2) 1) (integer) 0
+   2) (integer) 1461043096
+   3) (integer) 14
+   4) 1) "auth"
+      2) "cdeledu"
+
+2、查看日志数量
+127.0.0.1:63781> slowlog len
+(integer) 3
+
+3、清除所有日志
+127.0.0.1:63781> slowlog reset

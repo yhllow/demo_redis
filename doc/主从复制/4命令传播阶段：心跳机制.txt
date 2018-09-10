@@ -1,0 +1,16 @@
+在命令传播阶段，除了发送写命令，主从节点还维持着心跳机制：PING 和 REPLCONF ACK。心跳机制对于主从复制的超时判断、数据安全等有作用。
+主->从：PING
+	每隔指定的时间，主节点会向从节点发送 PING 命令，这个 PING 命令的作用，主要是为了让从节点进行超时判断。
+	PING 发送的频率由 repl-ping-slave-period 参数控制，单位是秒，默认值是 10s。
+从->主：REPLCONF ACK
+	在命令传播阶段，从节点会向主节点发送 REPLCONF ACK 命令，频率是每秒 1 次；命令格式为：REPLCONF ACK {offset}，其中 offset 指从节点保存的复制偏移量。
+	REPLCONF ACK 命令的作用包括：
+	实时监测主从节点网络状态：该命令会被主节点用于复制超时的判断。此外，在主节点中使用 info Replication，可以看到其从节点的状态中的 lag 值，代表的是主节点上次收到该 REPLCONF ACK 命令的时间间隔。
+	在正常情况下，该值应该是 0 或 1，如下图所示：
+	./redis-cli info Replication
+	slave0:ip=192.168.170.104,port=7001,state=online,offset=154104538,lag=0
+	检测命令丢失：从节点发送了自身的 offset，主节点会与自己的 offset 对比，如果从节点数据缺失（如网络丢包），主节点会推送缺失的数据（这里也会利用复制积压缓冲区）。
+	注意，offset 和复制积压缓冲区，不仅可以用于部分复制，也可以用于处理命令丢失等情形；区别在于前者是在断线重连后进行的，而后者是在主从节点没有断线的情况下进行的。
+	辅助保证从节点的数量和延迟：Redis 主节点中使用 min-slaves-to-write 和 min-slaves-max-lag 参数，来保证主节点在不安全的情况下不会执行写命令；所谓不安全，是指从节点数量太少，或延迟过高。
+	例如 min-slaves-to-write 和 min-slaves-max-lag 分别是 3 和 10，含义是如果从节点数量小于 3 个，或所有从节点的延迟值都大于 10s，则主节点拒绝执行写命令。
+	而这里从节点延迟值的获取，就是通过主节点接收到 REPLCONF ACK 命令的时间来判断的，即前面所说的 info Replication 中的 lag 值。

@@ -1,0 +1,29 @@
+1、object encoding查看对象编码
+127.0.0.1:6379> set name 123
+OK
+127.0.0.1:6379> object encoding name
+"int"
+
+2、strlen查看字符串长度
+127.0.0.1:6379> set name2 zhang
+OK
+127.0.0.1:6379> strlen name2
+(integer) 5
+
+3、编码的转换：可以通过append在数字后面追加字符，从而转为字符类型
+127.0.0.1:6379> append name chen
+(integer) 7
+127.0.0.1:6379> object encoding name
+"raw"
+
+4、setrange将字符串指定索引上的值替换为给定的字符
+127.0.0.1:6379> setrange name3 1 b
+
+5、getrange取出并返回字符串指定索引上的字符
+127.0.0.1:6379> getrange name3 1 3，1起始位置，3结束位置
+
+6、getset命令将一个key设置为新值，并将旧值作为返回值
+127.0.0.1:6379> getset name zsl
+(nil)
+127.0.0.1:6379> getset name zsl1
+"zsl"

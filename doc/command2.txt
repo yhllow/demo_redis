@@ -1,0 +1,105 @@
+Zinterstore 命令：计算给定的一个或多个有序集的交集，其中给定 key 的数量必须以 numkeys 参数指定，并将该交集(结果集)储存到 destination 。
+默认情况下，结果集中某个成员的分数值是所有给定集下该成员分数值之和。
+语法：ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
+返回值：保存到目标结果集的的成员数量。
+实例
+# 有序集 mid_test
+ZADD mid_test 70 "Li Lei"
+ZADD mid_test 70 "Han Meimei"
+ZADD mid_test 99.5 "Tom"
+
+# 另一个有序集 fin_test
+ZADD fin_test 88 "Li Lei"
+ZADD fin_test 75 "Han Meimei"
+ZADD fin_test 99.5 "Tom"
+
+# 交集
+ZINTERSTORE sum_point 2 mid_test fin_test
+
+# 显示有序集内所有成员及其分数值
+ZRANGE sum_point 0 -1 WITHSCORES
+1) "Han Meimei"
+2) "145"
+3) "Li Lei"
+4) "158"
+5) "Tom"
+6) "199"
+
+Zunionstore 命令：计算给定的一个或多个有序集的并集
+其中给定 key 的数量必须以 numkeys 参数指定，并将该并集(结果集)储存到 destination 。
+默认情况下，结果集中某个成员的分数值是所有给定集下该成员分数值之和 。
+语法：Zunionstore destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE SUM|MIN|MAX]
+返回值：保存到目标结果集的的成员数量。
+实例
+# 有序集 mid_test
+ZADD mid_test 70 "Li Lei"
+ZADD mid_test 70 "Han Meimei"
+ZADD mid_test 100 "lili"
+ZADD mid_test 99.5 "Tom"
+
+# 另一个有序集 fin_test
+ZADD fin_test 88 "Li Lei"
+ZADD fin_test 75 "Han Meimei"
+ZADD fin_test 99.5 "Tom"
+ZADD fin_test 80.5 "zhangsan"
+
+# 另一个集和 san_test
+sADD san_test "Li Lei"
+sADD san_test "Han Meimei"
+
+# 交集，无序集合分值按1计算
+Zunionstore sum_point 3 mid_test fin_test san_test
+
+# 显示有序集内所有成员及其分数值
+ZRANGE sum_point 0 -1 WITHSCORES
+ 1) "zhangsan"
+ 2) "80.5"
+ 3) "lili"
+ 4) "100"
+ 5) "Han Meimei"
+ 6) "145"
+ 7) "Li Lei"
+ 8) "158"
+ 9) "Tom"
+10) "199"
+
+ZADD programmer 2000 "peter"
+ZADD programmer 3500 "jack"
+ZADD programmer 5000 "tom"
+ZADD manager 2000 "herry"
+ZADD manager 3500 "mary"
+ZADD manager 4000 "bob"
+#公司决定加薪，除了程序员
+ZUNIONSTORE salary 2 programmer manager WEIGHTS 1 3   
+ZRANGE salary 0 -1 WITHSCORES
+ 1) "peter"
+ 2) "2000"
+ 3) "jack"
+ 4) "3500"
+ 5) "tom"
+ 6) "5000"
+ 7) "herry"
+ 8) "6000"
+ 9) "mary"
+10) "10500"
+11) "bob"
+12) "12000"
+
+redis-check-aof：检查aof文件状态
+redis-check-dump：检查快照文件状态
+
+hlen命令用于获取包含存储于键的散列的字段的数量。
+
+idletime对象空转时长，即从现在到上次访问的时间间隔，当maxmemory选项被开启后，达到maxmemory后，idletime时间长的会被优先释放
+redis 127.0.0.1:6379> object idletime a
+(integer) 380
+
+
+127.0.0.1:6379> info stats
+# Stats
+instantaneous_ops_per_sec:0//每秒处理的命令数
+
+127.0.0.1:6379> info memory
+# Memory
+used_memory:2295048//服务器使用的内存峰值
+used_memory_human:2.19M//服务器使用的内存峰值

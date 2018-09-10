@@ -1,0 +1,41 @@
+1、subscribe订阅频道"news.sport" "news.movie"
+127.0.0.1:6379> subscribe "news.sport" "news.movie"
+Reading messages... (press Ctrl-C to quit)
+1) "subscribe" 第一行固定的
+2) "news.sport" 订阅的频道名字
+3) (integer) 1 该频道有多少订阅者
+1) "subscribe"
+2) "news.movie"
+3) (integer) 2
+
+2、unsubscribe退订
+
+3、psubscribe订阅模式
+127.0.0.1:6379> psubscribe "news.*" 订阅所有news.开头的频道
+Reading messages... (press Ctrl-C to quit)
+1) "psubscribe"
+2) "news.*"
+3) (integer) 1
+
+4、punsubscribe退订模式
+
+5、publish将消息发送给订阅者
+127.0.0.1:6379> publish news.movie abc
+(integer) 2
+
+6、pubsub channels返回服务器当前被订阅的频道
+127.0.0.1:6379> pubsub channels
+1) "news.movie"
+2) "news.sport"
+
+127.0.0.1:6379> pubsub channels "news.[is]*"
+2) "news.sport"
+
+7、pubsub numsub返回频道的订阅者数量
+127.0.0.1:6379> pubsub numsub news.sport
+1) "news.sport"
+2) (integer) 1
+
+8、pubsub numpat返回服务器被订阅模式的数量
+127.0.0.1:6379> pubsub numpat
+(integer) 1

@@ -1,0 +1,1 @@
+f:\redis2.8\redis-server.exe F:\workspace_luna\demo_redis\doc\Ö÷´Ó¸´ÖÆ\conf-home\63793.conf

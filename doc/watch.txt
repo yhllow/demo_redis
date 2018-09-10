@@ -1,0 +1,15 @@
+watch是可以监控key的是否改动，如果数据有变动的话，multi exec会失败的… 如果没有变动，那么就正常推送进去。    
+看下面的测试，我们注意到了redis的return nil失败。 失败的原因是，在multi或incr之前，我用另外一个客户端做了数据的变动。 
+你的事务提交给去后，redis会判断watch的那个key，有没有变动的。
+redis 127.0.0.1:6379> get c
+"202"
+redis 127.0.0.1:6379> watch c
+OK
+redis 127.0.0.1:6379> MULTI
+OK
+redis 127.0.0.1:6379> INCR c
+QUEUED
+redis 127.0.0.1:6379> INCR c
+QUEUED
+redis 127.0.0.1:6379> EXEC
+(nil)

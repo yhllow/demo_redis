@@ -1,0 +1,91 @@
+centos7+redis+php环境配置
+
+下载redis（更多版本可到redis官网进行查找）
+wget http://download.redis.io/releases/redis-3.0.7.tar.gz
+解压，编译
+tar -zxvf redis-3.0.7.tar.gz
+cd redis-3.0.7
+make
+make test
+　　make test时出现如下异常
+
+cd src && make test
+make[1]: Entering directory `/root/redis-3.0.7/src'
+You need tcl 8.5 or newer in order to run the Redis test
+make[1]: *** [test] Error 1
+make[1]: Leaving directory `/root/redis-3.0.7/src'
+make: *** [test] Error 2
+　　缺少tcl，安装tcl
+
+yum install tcl
+　　编译，安装
+
+make test
+make install
+　　成功安装出现如下提示信息
+
+复制代码
+cd src && make install
+make[1]: Entering directory `/root/redis-3.0.7/src'
+
+Hint: It's a good idea to run 'make test' ;)
+
+    INSTALL install
+    INSTALL install
+    INSTALL install
+    INSTALL install
+    INSTALL install
+make[1]: Leaving directory `/root/redis-3.0.7/src'
+复制代码
+初始化redis
+复制代码
+cd utils
+./install_server.sh
+Welcome to the redis service installer
+This script will help you easily set up a running redis server
+
+Please select the redis port for this instance: [6379] y
+Selecting default: 6379
+Please select the redis config file name [/etc/redis/6379.conf]
+Selected default - /etc/redis/6379.conf
+Please select the redis log file name [/var/log/redis_6379.log]
+Selected default - /var/log/redis_6379.log
+Please select the data directory for this instance [/var/lib/redis/6379]
+Selected default - /var/lib/redis/6379
+Please select the redis executable path [/usr/local/bin/redis-server]
+Selected config:
+Port           : 6379
+Config file    : /etc/redis/6379.conf
+Log file       : /var/log/redis_6379.log//这个日志文件是Redis服务器普通的日志文件，在集群模式下，第一次也会自动创建一个日志文件，由配置文件cluster-config-file指定文件。
+集群配置文件的作用：当集群内节点发生信息变化时，如添加节点、节点下线、故障转移等。节点会自动保存集群的状态到配置文件中。该配置文件由Redis自行维护，不要手动修改，防止节点重启时产生集群信息错乱。
+Data dir       : /var/lib/redis/6379
+Executable     : /usr/local/bin/redis-server
+Cli Executable : /usr/local/bin/redis-cli
+Is this ok? Then press ENTER to go on or Ctrl-C to abort.
+Copied /tmp/6379.conf => /etc/init.d/redis_6379
+Installing service...
+Successfully added to chkconfig!
+Successfully added to runlevels 345!
+Starting Redis server...
+Installation successful!
+复制代码
+修改redis.conf
+
+
+
+daemonize on
+
+改为
+
+daemonize yes
+
+此时为后台启动
+
+启动redis
+
+
+ ./src/redis-server ./redis.conf
+安装php支持php-redis
+yum install php-redis
+ 检测是否成功安装
+　　通过phpinfo查看是否已经安装成功。

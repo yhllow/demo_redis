@@ -1,0 +1,24 @@
+与主从节点都有关的配置
+	首先介绍最特殊的配置，它决定了该节点是主节点还是从节点：
+	slaveof <masterip> <masterport>：Redis 启动时起作用；作用是建立复制关系，开启了该配置的 Redis 服务器在启动后成为从节点。该注释默认注释掉，即 Redis 服务器默认都是主节点。
+	repl-timeout 60：与各个阶段主从节点连接超时判断有关，见前面的介绍。
+
+主节点相关配置
+	repl-diskless-sync no：作用于全量复制阶段，控制主节点是否使用 diskless 复制（无盘复制）。
+	所谓 diskless 复制，是指在全量复制时，主节点不再先把数据写入 RDB 文件，而是直接写入 slave 的 socket 中，整个过程中不涉及硬盘。
+	diskless 复制在磁盘 IO 很慢而网速很快时更有优势。需要注意的是，截至 Redis 3.0，diskless 复制处于实验阶段，默认是关闭的。
+	repl-diskless-sync-delay 5：该配置作用于全量复制阶段，当主节点使用 diskless 复制时，该配置决定主节点向从节点发送之前停顿的时间，单位是秒；只有当 diskless 复制打开时有效，默认 5s。
+	之所以设置停顿时间，是基于以下两个考虑：
+		向 slave 的 socket 的传输一旦开始，新连接的 slave 只能等待当前数据传输结束，才能开始新的数据传输。
+		多个从节点有较大的概率在短时间内建立主从复制。
+	client-output-buffer-limit slave 256MB 64MB 60：与全量复制阶段主节点的缓冲区大小有关，见前面的介绍。
+	repl-disable-tcp-nodelay no：与命令传播阶段的延迟有关，见前面的介绍。
+	masterauth <master-password>：与连接建立阶段的身份验证有关，见前面的介绍。
+	repl-ping-slave-period 10：与命令传播阶段主从节点的超时判断有关，见前面的介绍。
+	repl-backlog-size 1mb：复制积压缓冲区的大小，见前面的介绍。
+	repl-backlog-ttl 3600：当主节点没有从节点时，复制积压缓冲区保留的时间，这样当断开的从节点重新连进来时，可以进行全量复制；默认 3600s。如果设置为 0，则永远不会释放复制积压缓冲区。
+	min-slaves-to-write 3 与 min-slaves-max-lag 10：规定了主节点的最小从节点数目，及对应的最大延迟，见前面的介绍。
+
+从节点相关配置
+	slave-serve-stale-data yes：与从节点数据陈旧时是否响应客户端命令有关，见前面的介绍。
+	slave-read-only yes：从节点是否只读；默认是只读的。由于从节点开启写操作容易导致主从节点的数据不一致，因此该配置尽量不要修改。

@@ -1,0 +1,100 @@
+1、最简单的执行形式：sort key asc|desc，默认asc
+redis 127.0.0.1:6379> rpush numbers 3 1 2
+(integer) 3
+redis 127.0.0.1:6379> sort numbers
+1) "1"
+2) "2"
+3) "3"
+
+2、按字符串排序用alpha
+redis 127.0.0.1:6379> sadd fruits apple banana cherry
+(integer) 3
+redis 127.0.0.1:6379> smembers fruits
+1) "cherry"
+2) "banana"
+3) "apple"
+redis 127.0.0.1:6379> sort fruits alpha
+1) "apple"
+2) "banana"
+3) "cherry"
+
+3、by选项
+默认情况下sort命令使用被排序键包含的元素作为排序的权重，元素本身决定了元素在排序之后所处的位置
+通过by，sort可以指定某些字符串键，或者某个哈希键所包含的某些域来作为元素的权重，对一个键进行排序
+redis 127.0.0.1:6379> sadd fruits apple banana cherry
+(integer) 3
+redis 127.0.0.1:6379> mset apple-price 8 banana-price 5.5 cherry-price 7
+OK
+redis 127.0.0.1:6379> sort fruits by *-price
+1) "banana"
+2) "cherry"
+3) "apple"
+
+4、by选项+alpha
+redis 127.0.0.1:6379> sadd fruits apple banana cherry
+(integer) 3
+redis 127.0.0.1:6379> mset apple-id fruit-25 banana-id fruit-79 cherry-id fruit-13
+OK
+redis 127.0.0.1:6379> sort fruits by *-id alpha
+1) "cherry"
+2) "apple"
+3) "banana"
+
+5、limit：从第几位开始，返回多少个结果
+127.0.0.1:63781> sadd table a b c d e f
+(integer) 6
+127.0.0.1:63781> sort table alpha
+1) "a"
+2) "b"
+3) "c"
+4) "d"
+5) "e"
+6) "f"
+127.0.0.1:63781> sort table alpha limit 0 4
+1) "a"
+2) "b"
+3) "c"
+4) "d"
+127.0.0.1:63781> sort table alpha limit 1 4
+1) "b"
+2) "c"
+3) "d"
+4) "e"
+
+6、get选项：让sort命令在对键进行排序之后，根据被排序的元素，以及get选项所指定的模式，查找并返回某些键的值
+默认情况下排序返回的结果都是键本身所包含的元素
+127.0.0.1:63781> set peter-name "peter white"
+OK
+127.0.0.1:63781> set jack-name "jack snow"
+OK
+127.0.0.1:63781> set tom-name "tom smith"
+OK
+127.0.0.1:63781> sadd students jack peter tom
+(integer) 3
+127.0.0.1:63781> sort students alpha get *-name
+1) "jack snow"
+2) "peter white"
+3) "tom smith"
+get可以有多个
+127.0.0.1:63781> set peter-birth 1995-6-7
+OK
+127.0.0.1:63781> set tom-birth 1995-8-16
+OK
+127.0.0.1:63781> sort students alpha get *-name get *-birth
+1) "jack snow"
+2) (nil)
+3) "peter white"
+4) "1995-6-7"
+5) "tom smith"
+6) "1995-8-16"
+
+7、store：默认情况下sort命令只向客户端返回排序结果，而不保存排序结果，通过store选项，可以把排序结果保存在指定键里
+127.0.0.1:63781> sort students alpha get *-name get *-birth store studentss
+(integer) 6
+127.0.0.1:63781> lrange studentss 0 -1
+1) "jack snow"
+2) ""
+3) "peter white"
+4) "1995-6-7"
+5) "tom smith"
+6) "1995-8-16"

@@ -1,0 +1,47 @@
+redis cluster（集群）
+redis集群配置参考我的博文：http://blog.csdn.net/nuli888/article/details/52134117
+3.0之后的功能，至少需要3(Master)+3(Slave)才能建立集群，是无中心的分布式存储架构，可以在多个节点之间进行数据共享，解决了Redis高可用、可扩展等问题。
+Redis集群提供了以下两个好处
+1、将数据自动切分(split)到多个节点
+2、当集群中的某一个节点故障时，redis还可以继续处理客户端的请求。
+一个 redis 集群包含 16384 个哈希槽（hash slot），数据库中的每个数据都属于这16384个哈希槽中的一个。集群使用公式 CRC16(key) % 16384 来计算键 key 属于哪个槽。集群中的每一个节点负责处理一部分哈希槽。
+集群中的主从复制
+集群中的每个节点都有1个至N个复制品，其中一个为主节点，其余的为从节点，如果主节点下线了，集群就会把这个主节点的一个从节点设置为新的主节点，继续工作。这样集群就不会因为一个主节点的下线而无法正常工作
+注意：
+1、如果某一个主节点和他所有的从节点都下线的话，redis集群就会停止工作了。redis集群不保证数据的强一致性，在特定的情况下，redis集群会丢失已经被执行过的写命令
+2、使用异步复制（asynchronous replication）是redis 集群可能会丢失写命令的其中一个原因，有时候由于网络原因，如果网络断开时间太长，redis集群就会启用新的主节点，之前发给主节点的数据就会丢失。
+
+1、server启动cluster模式：
+	cluster-enabled yes
+2、client启动cluster模式：
+	redis-cli.exe -c -p 64781
+3、将port6381节点加入集群
+	127.0.0.1:6380> cluster meet 127.0.0.1 6381
+4、查看集群状态
+	127.0.0.1:6380> cluster nodes
+	93d7b335de7818a4a5bcae58449de9e39f954d3b 127.0.0.1:6380 myself,master - 0 0 1 connected
+	ce732ea6c4dca23748ffa6d5e3549136e66e6996 127.0.0.1:6381 master - 0 1460707568643 0 connected
+
+	127.0.0.1:6380> cluster info
+	cluster_state:fail
+	cluster_slots_assigned:0
+	cluster_slots_ok:0
+	cluster_slots_pfail:0
+	cluster_slots_fail:0
+	cluster_known_nodes:2
+	cluster_size:0
+	cluster_current_epoch:1
+	cluster_my_epoch:1
+	cluster_stats_messages_sent:276
+	cluster_stats_messages_received:276
+5、给集群指派槽
+	127.0.0.1:6380> cluster addslots 0 1 2 3 4 5 6 7 8 9 10
+	OK
+	127.0.0.1:6380> cluster slots
+	1) 1) (integer) 0
+	   2) (integer) 10
+	   3) 1) "127.0.0.1"
+	      2) (integer) 6380
+	循环指派槽with bash: for i in {7001..16383}; do redis-cli -c -p 6381 cluster addslots $i; done
+6、查看data对应的槽
+	127.0.0.1:6380> cluster keyslot "data"

@@ -1,0 +1,65 @@
+1、事务开始、命令入队、事务执行
+redis 127.0.0.1:6379> multi
+OK
+redis 127.0.0.1:6379> set name zsl
+QUEUED
+redis 127.0.0.1:6379> get name
+QUEUED
+redis 127.0.0.1:6379> set author peter
+QUEUED
+redis 127.0.0.1:6379> get author
+QUEUED
+redis 127.0.0.1:6379> exec
+1) OK
+2) "zsl"
+3) OK
+4) "peter"
+redis 127.0.0.1:6379>
+
+2、watch
+A客户端执行
+redis 127.0.0.1:6379> watch name
+OK
+redis 127.0.0.1:6379> multi
+OK
+redis 127.0.0.1:6379> set name zsl
+QUEUED
+期间B客户端执行：
+redis 127.0.0.1:6379> set name ll
+OK
+回到A客户端
+redis 127.0.0.1:6379> exec
+(nil)
+redis 127.0.0.1:6379>
+
+3、ACID
+A原子性：事务队列命令要不全部执行，要不就一个都不执行
+C一致性
+I隔离性
+D耐久性
+以下展示了一个执行失败的事务，这个事务因为命令入队出错而被服务器拒绝执行，事务中的所有命令都不会被执行：
+redis 127.0.0.1:6379> multi
+OK
+redis 127.0.0.1:6379> set name abc
+QUEUED
+redis 127.0.0.1:6379> get
+(error) ERR wrong number of arguments for 'get' command
+redis 127.0.0.1:6379> get name
+QUEUED
+redis 127.0.0.1:6379> exec
+(error) EXECABORT Transaction discarded because of previous errors.
+
+redis不支持回滚，如果事务队列中某个命令在执行期间出现了错误（和一开始入队出错不一样，这种错误只有在执行时才会发现），
+整个事务也会继续执行下去，直到将事务队列中的所有命令都执行完毕为止：
+redis 127.0.0.1:6379> multi
+OK
+redis 127.0.0.1:6379> set msg abc
+QUEUED
+redis 127.0.0.1:6379> rpush msg ok
+QUEUED
+redis 127.0.0.1:6379> sadd alphabet a b c
+QUEUED
+redis 127.0.0.1:6379> exec
+1) OK
+2) (error) ERR Operation against a key holding the wrong kind of value
+3) (integer) 3

@@ -1,0 +1,1 @@
+e:\redis30\redis-cli.exe -p 63781

@@ -1,0 +1,18 @@
+一、RDB
+通过save命令执行，会阻塞服务器进程
+通过bgsave命令执行，会生成子进程，不阻塞服务器进程
+服务器在载入rdb文件时，会一直处于阻塞状态
+
+配置：
+dir e:/redis30/data/
+dbfilename dump-63781.rdb
+save 60 10//每60秒执行10次操作
+save 900 1//每900秒执行1次操作
+//以上2个条件任意满足一个都会触发保存事件
+rdbcompression yes//rdb文件采用压缩的方式保存
+
+二、AOF
+# appendfsync always//每一次写操作都会调用一次fsync，这时数据是最安全的，当然，由于每次都会执行fsync，所以其性能也会受到影响。
+appendfsync everysec//当设置appendfsync为everysec的时候，Redis会默认每隔一秒进行一次fsync调用，将缓冲区中的数据写到磁盘。但是当这一次的fsync调用时长超过1秒时。Redis会采取延迟fsync的策略，再等一秒钟。也就是在两秒后再进行fsync，这一次的fsync就不管会执行多 长时间都会进行。这时候由于在fsync时文件描述符会被阻塞，所以当前的写操作就会阻塞。
+//结论就是，在绝大多数情况下，Redis会每隔一秒进行一 次fsync。在最坏的情况下，两秒钟会进行一次fsync操作。这一操作在大多数数据库系统中被称为group commit，就是组合多次写操作的数据，一次性将日志写到磁盘。
+# appendfsync no//当设置appendfsync为no的时候，Redis不会主动调用fsync去将AOF日志内容同步到磁盘，所以这一切就完全依赖于操作系统的调试了。对大多数Linux操作系统，是每30秒进行一次fsync，将缓冲区中的数据写到磁盘上。

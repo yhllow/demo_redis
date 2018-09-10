@@ -1,0 +1,30 @@
+命令可以分为两种，一种是可以针对任何类型的键执行：例如del、expire、rename、type、object、exists（某个键是否存在）、
+dbsize（数据库里的键总数）、randomkey（返回任意键）
+type返回指定key中存在的值的类型。
+set msg "hello"
+rpush num 1 2 3
+sadd fruits apple banana cherry
+del msg
+del num
+del fruits
+
+一种是只能针对特定类型的键执行
+set get append strlen等命令只能对字符串键执行
+hdel hset hget hlen等命令只能针对哈希键执行
+rpush lpop linsert llen等命令只能针对列表键执行
+sadd spop sinter scard等命令只能针对集合键执行
+zadd zcard zrank zscore等命令只能针对有序集合键执行
+
+redis 127.0.0.1:6379> info stats
+# Stats
+total_connections_received:3
+total_commands_processed:78
+instantaneous_ops_per_sec:0
+rejected_connections:0
+expired_keys:0
+evicted_keys:0
+keyspace_hits:33（数据库键空间命中次数）
+keyspace_misses:0（数据库键空间不命中次数）
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:0
